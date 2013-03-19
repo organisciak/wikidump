@@ -2,7 +2,7 @@ import re
 from nltk.tokenize import sent_tokenize
 from utils import (strip_between, WIKI_INTERNAL_LINK, WIKI_PIPED_LINK,
                    WIKI_EXTERNAL_LINK, WIKI_FORMATTING)
-from ..fingerprinting import NgramFingerprintKeyer 
+from fingerprinting import nGramFingerprintKeyer
 
 # CLASSES
 class WikiDumpRevision(object):
@@ -46,10 +46,14 @@ class WikiDumpRevision(object):
     @property
     def sentences(self):
         ''' Return all the sentences from the text '''
-        s = sent_tokenize(self.plaintext)
-        for S in s:
-            print 'SENTENCE:', S
-        return s
+        sentences = sent_tokenize(self.plaintext)
+        return sentences
+
+    def keys(self, size=2):
+        ''' Return fingerprinted keys for each sentence '''
+        keyer = nGramFingerprintKeyer(size=size)
+        keys = [keyer.key(s) for s in self.sentences]
+        return keys
 
     def __repr__(self):
         return '<WikiDumpRevision %s for \'%s\'>' % (self.rid,
