@@ -1,8 +1,9 @@
 import re
 from nltk.tokenize import sent_tokenize
 from utils import (strip_between, WIKI_INTERNAL_LINK, WIKI_PIPED_LINK,
-                   WIKI_EXTERNAL_LINK, WIKI_FORMATTING)
+                   WIKI_FORMATTING)
 from fingerprinting import nGramFingerprintKeyer
+
 
 # CLASSES
 class WikiDumpRevision(object):
@@ -24,7 +25,8 @@ class WikiDumpRevision(object):
     @property
     def text(self):
         ''' Return the unprocessed text content of the revision '''
-        return self.parent.parent.text(self.text_start, self.text_end)
+        return self.parent.text(self.text_start, self.text_end)
+        #return self.parent.parent.text(self.text_start, self.text_end)
 
     @property
     def plaintext(self):
@@ -43,16 +45,22 @@ class WikiDumpRevision(object):
         s = re.sub(WIKI_FORMATTING, "", s)
         return s
 
-    @property
     def sentences(self):
-        ''' Return all the sentences from the text '''
+        '''
+        Return all the sentences from the text
+
+        Since this may be run on a large number of texts, the smart parameter
+        lets you tokenize with NLTK (smart=True) or with a faster, sloppy
+        regular expression.
+
+        '''
         sentences = sent_tokenize(self.plaintext)
         return sentences
 
     def keys(self, size=2):
         ''' Return fingerprinted keys for each sentence '''
         keyer = nGramFingerprintKeyer(size=size)
-        keys = [keyer.key(s) for s in self.sentences]
+        keys = [keyer.key(s) for s in self.sentences()]
         return keys
 
     def __repr__(self):

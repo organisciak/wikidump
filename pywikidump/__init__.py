@@ -1,0 +1,4 @@
+from pywikidump.wiki_dump_file import WikiDumpFile
+from pywikidump.wiki_dump_page import WikiDumpPage
+from pywikidump.wiki_dump_revision import WikiDumpRevision
+from pywikidump.wiki_dump_export import WikiDumpExport

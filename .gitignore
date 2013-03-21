@@ -1,0 +1,26 @@
+scripts/topics
+scripts/out
+
+# Ignore compiled Python files
+*.pyc
+
+# Ignore Vim scratch
+*.*~
+*.swp
+
+# OS generated files #
+######################
+.DS_Store
+.DS_Store?
+._*
+.Trashes
+.Spotlight-V100
+Icon?
+ehthumbs.db
+Thumbs.db
+
+# Logs #
+#######################
+*.log
+data/references/*.txt
+.Rhistory

@@ -26,18 +26,19 @@ class WikiDumpFile(object):
     '''
     Handler for Wikipedia bzip2 export files.
     '''
-    def __init__(self, file, bytes=0):
+    def __init__(self, file, bytes=0, memcache=None):
         self.file = bz2.BZ2File(file, 'r')
         self.loc = bytes
         if self.loc > 0:
             self.file.seek(self.loc)
         self.lines = 0
         self.pages = 0
+        self.memcache = memcache
 
     def next_page(self, namespaces=[0]):
         ''' Return a WikiDumpPage object representing the next page
         in the file '''
-        #page_buffer = ""
+        page_buffer = ""
         page = {}
         revision = {}
         page_open = False
@@ -56,7 +57,7 @@ class WikiDumpFile(object):
 
             if page_open and not skip_page:
                 #Write line to buffer
-                #page_buffer = page_buffer + line
+                page_buffer = page_buffer + line
                 page['lines'] += 1
                 if page['lines'] is 1:
                     #First line of <page> is title
@@ -110,6 +111,9 @@ class WikiDumpFile(object):
                         logging.debug("No valid revisions found, skipping")
                         return self.next_page(namespaces)
                     else:
+                        if self.memcache:
+                            #Save page buffer to memcache
+                            self.memcache.set(page["pid"], page_buffer)
                         return WikiDumpPage(self, **page)
                     #page_buffer = ""
             # Only check for end of page tag when skipping page
@@ -122,7 +126,8 @@ class WikiDumpFile(object):
                 page_open = True
                 page = {'lines': 0,
                         'start': self.loc - len(line),
-                        'revisions': []
+                        'revisions': [],
+                        'memcache': self.memcache
                         }
             elif not page_open:
                 # Check if file is done

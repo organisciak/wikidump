@@ -1,4 +1,0 @@
-from wikidump.wiki_dump_file import WikiDumpFile
-from wikidump.wiki_dump_page import WikiDumpPage
-from wikidump.wiki_dump_revision import WikiDumpRevision
-from wikidump.wiki_dump_export import WikiDumpExport

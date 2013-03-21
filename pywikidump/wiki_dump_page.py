@@ -1,16 +1,19 @@
 from wiki_dump_revision import WikiDumpRevision
+from collections import defaultdict
 
 
 class WikiDumpPage(object):
     revisions = []
     _sent_cache = {}
 
-    def __init__(self, parent, start, end, title, pid, revisions, **kwargs):
+    def __init__(self, parent, start, end, title, pid, revisions,
+                 memcache=None, **kwargs):
         self.parent = parent
         self.start = start
         self.end = end
         self.title = title
         self.pid = pid
+        self.memcache = memcache
         for revision in revisions:
             self.revisions += [WikiDumpRevision(self, **revision)]
         for key, value in kwargs.iteritems():
@@ -20,7 +23,7 @@ class WikiDumpPage(object):
     @property
     def plaintext(self):
         ''' Return the raw text of the page '''
-        return self.parent.text(self.start, self.end)
+        return self.text(self.start, self.end)
 
     def sent_keys(self, cache=True, key_size=2):
         '''
@@ -47,7 +50,7 @@ class WikiDumpPage(object):
         if cache is True and self._sent_cache:
             return self._sent_cache
         if cache is False or not self._sent_cache:
-            sent_index = {}
+            '''sent_index = {}
             for i, revision in enumerate(self.revisions):
                 keys = revision.keys(size=key_size)
                 for key in keys:
@@ -68,7 +71,47 @@ class WikiDumpPage(object):
 
             if cache is True:
                 self._sent_cache = sent_index
-            return sent_index
+            return sent_index'''
+            sent_history = defaultdict(list)
+            #sent_firstrev = {}
+            #sent_lastrev = defaultdict(int)
+
+            for i, revision in enumerate(self.revisions):
+                keys = revision.keys(size=2)
+                for key in keys:
+                    sent_history[key].append(i)
+            return sent_history
+
+    def text(self, start=None, end=None):
+        '''
+        Return the text of the page.
+
+        The start and end args specify byte locations, relative to the parent
+        WikiDumpFile. If specified, they need to be within the boundaries of
+        this page's byte locations.
+        '''
+        if not self.memcache:
+            return self._uncached_text(start=start, end=end)
+
+        if start is None:
+            start = self.start
+        if end is None:
+            end = self.end
+
+        # If caching, it make sense to get the full page first, regardless
+        # of whether you're returning everything or just a part
+        page_text = self.memcache.get(self.pid)
+        if page_text is None:
+            page_text = self.parent.text(self.start, self.end)
+            self.memcache.set(self.pid, page_text)
+        return page_text[start-self.start:end-self.end]
+
+    def _uncached_text(self, start=None, end=None):
+        if start is None:
+            return self.parent.text(self.start, self.end)
+        else:
+            assert start >= self.start and end <= self.end
+            return self.parent.text(start, end)
 
     def __repr__(self):
         return '<WikiDumpPage for \'%s\'>' % self.title[:50]
