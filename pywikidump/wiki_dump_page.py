@@ -3,6 +3,9 @@ from collections import defaultdict
 
 
 class WikiDumpPage(object):
+    '''
+    Representation of a page from a Wikipedia export.
+    '''
     revisions = []
     _sent_cache = {}
 

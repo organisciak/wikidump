@@ -7,6 +7,7 @@ from fingerprinting import nGramFingerprintKeyer
 
 # CLASSES
 class WikiDumpRevision(object):
+    ''' Representation of a single revision of a Wikipedia page.'''
     def __init__(self, parent, start, end, rid, timestamp, text_start,
                  text_end, **kwargs):
         self.parent = parent
