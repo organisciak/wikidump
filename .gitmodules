@@ -1,0 +1,6 @@
+[submodule "doc/_build/html"]
+	path = doc/_build/html
+	url = git@github.com:organisciak/wikidump.git
+[submodule "doc/_build/gh-pages"]
+	path = doc/_build/gh-pages
+	url = git@github.com:organisciak/wikidump.git

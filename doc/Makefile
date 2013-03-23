@@ -41,6 +41,11 @@ help:
 clean:
 	-rm -rf $(BUILDDIR)/*
 
+ghpages:
+	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/gh-pages
+	@echo
+	@echo "Build finished. The HTML pages are in $(BUILDDIR)/gh-pages."
+
 html:
 	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
 	@echo
