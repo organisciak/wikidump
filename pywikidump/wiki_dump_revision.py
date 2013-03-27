@@ -1,7 +1,7 @@
 import re
 from nltk.tokenize import sent_tokenize
 from utils import (strip_between, WIKI_INTERNAL_LINK, WIKI_PIPED_LINK,
-                   WIKI_FORMATTING)
+                   WIKI_FORMATTING, parsetime)
 from fingerprinting import nGramFingerprintKeyer
 
 
@@ -16,7 +16,12 @@ class WikiDumpRevision(object):
         self.rid = rid
         self.text_start = text_start
         self.text_end = text_end
-        self.timestamp = timestamp
+        self._timestamp = timestamp
+
+    @property
+    def timestamp(self):
+        ''' Return a parsed timestamp '''
+        return parsetime(self._timestamp)
 
     @property
     def raw(self):

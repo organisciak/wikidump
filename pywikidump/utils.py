@@ -1,4 +1,5 @@
 import re
+import datetime
 
 # Regular Expressions
 # [[Wikipedia_page|Text on the page]]
@@ -29,3 +30,13 @@ def strip_between(a, b, string):
     p = "%s.*?%s" % (a, b)
     p = re.compile(p, re.DOTALL | re.I)
     return re.sub(p, "", string)
+
+
+def parseTime(time):
+    ''' Parse  a timestamp string in the form of 2006-04-18T22:00:53Z.
+    Note that the Zulu timezone is not parsed, and assumed for all cases.
+
+    Returns a datetime object.
+    '''
+    time = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%SZ')
+    print time
