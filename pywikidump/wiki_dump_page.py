@@ -10,14 +10,14 @@ class WikiDumpPage(object):
     _sent_cache = {}
 
     def __init__(self, parent, start, end, title, page_id, revisions,
-                 memcache=None, **kwargs):
+                 mamcached=None, **kwargs):
         self.parent = parent
         self.start = start
         self.end = end
         self.name = title
         # I'm doing it, I'm totally doing it: overriding the built-in id
         self.id = page_id
-        self.memcache = memcache
+        self.mamcached = mamcached
         for revision in revisions:
             self.revisions += [WikiDumpRevision(self, **revision)]
         for key, value in kwargs.iteritems():
@@ -94,7 +94,7 @@ class WikiDumpPage(object):
         WikiDumpFile. If specified, they need to be within the boundaries of
         this page's byte locations.
         '''
-        if not self.memcache:
+        if not self.mamcached:
             return self._uncached_text(start=start, end=end)
 
         if start is None:
@@ -104,10 +104,10 @@ class WikiDumpPage(object):
 
         # If caching, it make sense to get the full page first, regardless
         # of whether you're returning everything or just a part
-        page_text = self.memcache.get(self.id)
+        page_text = self.mamcached.get(self.id)
         if page_text is None:
             page_text = self.parent.text(self.start, self.end)
-            self.memcache.set(self.id, page_text)
+            self.mamcached.set(self.id, page_text)
         return page_text[start-self.start:end-self.end]
 
     def _uncached_text(self, start=None, end=None):
