@@ -6,6 +6,7 @@ Created on Dec 11, 2012
 import bz2
 import re
 import logging
+import os
 from wiki_dump_page import WikiDumpPage
 
 ### Regular Expressions ###
@@ -16,6 +17,8 @@ TEXT_TAG_END = re.compile('.*<\/text>\n?')
 PAGE_TAG_END = re.compile('\s*\<\/page>')
 REVISION_TAG_START = re.compile('\s*\<revision\>\n?')
 REVISION_TAG_END = re.compile('.*\<\/revision\>\n?')
+# Example: <timestamp>2006-04-15T12:24:27Z</timestamp>
+TIMESTAMP_TEXT_MATCH = re.compile(r'<timestamp>(.*)<\/timestamp>')
 # Syntax
 # In addition to the #REDIRECT tag, account for the invalid but seen REDIRECT:
 REDIRECT = re.compile('\#REDIRECT|REDIRECT:', re.IGNORECASE)
@@ -28,6 +31,8 @@ class WikiDumpFile(object):
     '''
     def __init__(self, file, bytes=0, memcache=None):
         self.file = bz2.BZ2File(file, 'r')
+        self.page = os.path.abspath(file)
+        self.name = os.path.basename(file)
         self.loc = bytes
         if self.loc > 0:
             self.file.seek(self.loc)
@@ -71,15 +76,17 @@ class WikiDumpFile(object):
                         skip_page = True
                 elif page['lines'] is 3:
                     # Third line of <page> is id
-                    page["pid"] = line.strip()[4:-5]
+                    page["page_id"] = line.strip()[4:-5]
 
                 if revision_open:
                     revision['lines'] += 1
                     if revision['lines'] is 1:
                         # First line of <revision> is id
                         revision['rid'] = line.strip()[4:-5]
-                    elif revision['lines'] is 2:
-                        revision['timestamp'] = line.strip()[12:-13]
+                    elif revision['lines'] is 2 or revision['lines'] is 3:
+                        timestamp = TIMESTAMP_TEXT_MATCH.search(line)
+                        if timestamp is not None:
+                            revision['timestamp'] = timestamp.group(1)
                     elif REVISION_TAG_END.search(line):
                         revision_open = False
                         revision['end'] = self.loc
@@ -113,7 +120,7 @@ class WikiDumpFile(object):
                     else:
                         if self.memcache:
                             #Save page buffer to memcache
-                            self.memcache.set(page["pid"], page_buffer)
+                            self.memcache.set(page["page_id"], page_buffer)
                         return WikiDumpPage(self, **page)
                     #page_buffer = ""
             # Only check for end of page tag when skipping page

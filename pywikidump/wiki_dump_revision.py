@@ -1,7 +1,7 @@
 import re
 from nltk.tokenize import sent_tokenize
 from utils import (strip_between, WIKI_INTERNAL_LINK, WIKI_PIPED_LINK,
-                   WIKI_FORMATTING, parsetime)
+                   WIKI_FORMATTING, parse_time)
 from fingerprinting import nGramFingerprintKeyer
 
 
@@ -13,15 +13,20 @@ class WikiDumpRevision(object):
         self.parent = parent
         self.start = start
         self.end = end
-        self.rid = rid
+        self.id = rid
         self.text_start = text_start
         self.text_end = text_end
         self._timestamp = timestamp
 
     @property
+    def name(self):
+        '''Return the page name'''
+        return self.parent.name
+
+    @property
     def timestamp(self):
         ''' Return a parsed timestamp '''
-        return parsetime(self._timestamp)
+        return parse_time(self._timestamp)
 
     @property
     def raw(self):
@@ -70,5 +75,5 @@ class WikiDumpRevision(object):
         return keys
 
     def __repr__(self):
-        return '<WikiDumpRevision %s for \'%s\'>' % (self.rid,
-                                                     self.parent.title[:50])
+        return '<WikiDumpRevision %s for \'%s\'>' % (self.id,
+                                                     self.parent.name[:50])

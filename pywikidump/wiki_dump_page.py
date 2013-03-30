@@ -9,13 +9,14 @@ class WikiDumpPage(object):
     revisions = []
     _sent_cache = {}
 
-    def __init__(self, parent, start, end, title, pid, revisions,
+    def __init__(self, parent, start, end, title, page_id, revisions,
                  memcache=None, **kwargs):
         self.parent = parent
         self.start = start
         self.end = end
-        self.title = title
-        self.pid = pid
+        self.name = title
+        # I'm doing it, I'm totally doing it: overriding the built-in id
+        self.id = page_id
         self.memcache = memcache
         for revision in revisions:
             self.revisions += [WikiDumpRevision(self, **revision)]
@@ -103,10 +104,10 @@ class WikiDumpPage(object):
 
         # If caching, it make sense to get the full page first, regardless
         # of whether you're returning everything or just a part
-        page_text = self.memcache.get(self.pid)
+        page_text = self.memcache.get(self.id)
         if page_text is None:
             page_text = self.parent.text(self.start, self.end)
-            self.memcache.set(self.pid, page_text)
+            self.memcache.set(self.id, page_text)
         return page_text[start-self.start:end-self.end]
 
     def _uncached_text(self, start=None, end=None):
@@ -117,4 +118,4 @@ class WikiDumpPage(object):
             return self.parent.text(start, end)
 
     def __repr__(self):
-        return '<WikiDumpPage for \'%s\'>' % self.title[:50]
+        return '<WikiDumpPage for \'%s\'>' % self.name[:50]

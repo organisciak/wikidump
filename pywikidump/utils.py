@@ -32,11 +32,15 @@ def strip_between(a, b, string):
     return re.sub(p, "", string)
 
 
-def parseTime(time):
-    ''' Parse  a timestamp string in the form of 2006-04-18T22:00:53Z.
-    Note that the Zulu timezone is not parsed, and assumed for all cases.
+def parse_time(time):
+    ''' Parse  a timestamp string in the form of 2006-04-18T22:00:53Z or
+    2006-04-18T22:00:53.
+    Note that the Zulu timezone in the first form is not parsed.
 
     Returns a datetime object.
     '''
-    time = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%SZ')
+    print time
+    if time[-1] == 'Z':
+        time = time[:-1]
+    time = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S')
     print time
