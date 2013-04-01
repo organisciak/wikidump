@@ -39,8 +39,7 @@ def parse_time(time):
 
     Returns a datetime object.
     '''
-    print time
     if time[-1] == 'Z':
         time = time[:-1]
     time = datetime.datetime.strptime(time, '%Y-%m-%dT%H:%M:%S')
-    print time
+    return time

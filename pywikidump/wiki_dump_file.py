@@ -38,7 +38,7 @@ class WikiDumpFile(object):
             self.file.seek(self.loc)
         self.lines = 0
         self.pages = 0
-        self.mamcached = mamcached
+        self.memcached = memcached
 
     def next_page(self, namespaces=[0]):
         ''' Return a WikiDumpPage object representing the next page
@@ -92,7 +92,7 @@ class WikiDumpFile(object):
                         revision['end'] = self.loc
                         page['revisions'] += [revision]
                     elif TEXT_TAG_START.match(line):
-                        revision['text_start'] = self.loc - len(line) + 32
+                        revision['text_start'] = self.loc - len(line) + 33
                         if REDIRECT.search(line):
                             # TO CONFIRM: Assumes redirects are always at the
                             # start of the text.
@@ -118,9 +118,9 @@ class WikiDumpFile(object):
                         logging.debug("No valid revisions found, skipping")
                         return self.next_page(namespaces)
                     else:
-                        if self.mamcached:
-                            #Save page buffer to mamcached
-                            self.mamcached.set(page["page_id"], page_buffer)
+                        if self.memcached:
+                            #Save page buffer to memcached
+                            self.memcached.set(page["page_id"], page_buffer)
                         return WikiDumpPage(self, **page)
                     #page_buffer = ""
             # Only check for end of page tag when skipping page
@@ -134,8 +134,9 @@ class WikiDumpFile(object):
                 page = {'lines': 0,
                         'start': self.loc - len(line),
                         'revisions': [],
-                        'mamcached': self.mamcached
+                        'memcached': self.memcached
                         }
+                page_buffer = line
             elif not page_open:
                 # Check if file is done
                 if line == '':
@@ -148,6 +149,7 @@ class WikiDumpFile(object):
         Read text between two byte points, then return to the previous read
         state.
         '''
+        logging.debug('seeking in WikiDumpFile')
         self.file.seek(start)
         text = self.file.read(end - start)
         if return_to_original:
