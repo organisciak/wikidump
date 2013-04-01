@@ -12,16 +12,9 @@ Contents:
 .. toctree::
    :maxdepth: 2
 
-Installation
-============
-Prerequisites
-^^^^^^^^^^^^^
- * `Natural Language Toolkit <http://nltk.org>`_
- * `Python-memcached <http://www.tummy.com/software/python-memcached/>`_ or `pylibmc <http://sendapatch.se/projects/pylibmc/>`_ (Optional but recommended) 
-
-Tutorial
-========
-
+   installation
+   overview
+   tutorial
 
 PyWikiDump API
 ==============
