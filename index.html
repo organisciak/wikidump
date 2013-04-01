@@ -24,7 +24,8 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="PyWikidump 1.0 documentation" href="#" /> 
+    <link rel="top" title="PyWikidump 1.0 documentation" href="#" />
+    <link rel="next" title="Installation" href="installation.html" /> 
   </head>
   <body>
     <div class="related">
@@ -33,6 +34,12 @@
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             accesskey="N">next</a> |</li>
         <li><a href="#">PyWikidump 1.0 documentation</a> &raquo;</li> 
       </ul>
     </div>  
@@ -47,30 +54,171 @@
 <p>PyWikidump is a package for reading Wikipedia data dumps.
 Contents:</p>
 <div class="toctree-wrapper compound">
-<ul class="simple">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="installation.html#prerequisites">Prerequisites</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html">Tutorial</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#setup">Setup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#loading-a-wikipedia-export-file">Loading a Wikipedia Export File</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#fetching-wikipedia-pages">Fetching Wikipedia Pages</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tutorial.html#moments-in-time-with-revisions">Moments in time with revisions</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tutorial.html#tracking-text-across-revisions">Tracking text across revisions</a></li>
 </ul>
 </div>
 </div>
-<div class="section" id="installation">
-<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
-<div class="section" id="prerequisites">
-<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
-<blockquote>
-<div><ul class="simple">
-<li><a class="reference external" href="http://nltk.org">Natural Language Toolkit</a></li>
-<li><a class="reference external" href="http://www.tummy.com/software/python-memcached/">Python-memcached</a> or <a class="reference external" href="http://sendapatch.se/projects/pylibmc/">pylibmc</a> (Optional but recommended)</li>
-</ul>
-</div></blockquote>
+<div class="section" id="module-pywikidump.wiki_dump_file">
+<span id="pywikidump-api"></span><h1>PyWikiDump API<a class="headerlink" href="#module-pywikidump.wiki_dump_file" title="Permalink to this headline">¶</a></h1>
+<p>Created on Dec 11, 2012</p>
+<p>&#64;author: Peter Organisciak</p>
+<dl class="class">
+<dt id="pywikidump.wiki_dump_file.WikiDumpFile">
+<em class="property">class </em><tt class="descclassname">pywikidump.wiki_dump_file.</tt><tt class="descname">WikiDumpFile</tt><big>(</big><em>file</em>, <em>bytes=0</em>, <em>memcached=None</em><big>)</big><a class="headerlink" href="#pywikidump.wiki_dump_file.WikiDumpFile" title="Permalink to this definition">¶</a></dt>
+<dd><p>Handler for Wikipedia bzip2 export files.</p>
+<dl class="method">
+<dt id="pywikidump.wiki_dump_file.WikiDumpFile.next_page">
+<tt class="descname">next_page</tt><big>(</big><em>namespaces=[0]</em><big>)</big><a class="headerlink" href="#pywikidump.wiki_dump_file.WikiDumpFile.next_page" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a WikiDumpPage object representing the next page
+in the file</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pywikidump.wiki_dump_file.WikiDumpFile.text">
+<tt class="descname">text</tt><big>(</big><em>start</em>, <em>end</em>, <em>return_to_original=True</em><big>)</big><a class="headerlink" href="#pywikidump.wiki_dump_file.WikiDumpFile.text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read text between two byte points, then return to the previous read
+state.</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-pywikidump.wiki_dump_page"></span><dl class="class">
+<dt id="pywikidump.wiki_dump_page.WikiDumpPage">
+<em class="property">class </em><tt class="descclassname">pywikidump.wiki_dump_page.</tt><tt class="descname">WikiDumpPage</tt><big>(</big><em>parent</em>, <em>start</em>, <em>end</em>, <em>title</em>, <em>page_id</em>, <em>revisions</em>, <em>memcached=None</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pywikidump.wiki_dump_page.WikiDumpPage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation of a page from a Wikipedia export.</p>
+<dl class="attribute">
+<dt id="pywikidump.wiki_dump_page.WikiDumpPage.plaintext">
+<tt class="descname">plaintext</tt><a class="headerlink" href="#pywikidump.wiki_dump_page.WikiDumpPage.plaintext" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the raw text of the page</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pywikidump.wiki_dump_page.WikiDumpPage.revisions">
+<tt class="descname">revisions</tt><em class="property"> = []</em><a class="headerlink" href="#pywikidump.wiki_dump_page.WikiDumpPage.revisions" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pywikidump.wiki_dump_page.WikiDumpPage.sent_keys">
+<tt class="descname">sent_keys</tt><big>(</big><em>cache=True</em>, <em>key_size=2</em><big>)</big><a class="headerlink" href="#pywikidump.wiki_dump_page.WikiDumpPage.sent_keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>An index of sentence keys.
+For each unique fingerprint, an entry is created, with the following
+structure:</p>
+<dl class="docutils">
+<dt>sentence_key <span class="classifier-delimiter">:</span> <span class="classifier">{</span></dt>
+<dd>history: [rev_index1, rev_index2...rev_indexN]
+first_rev: int,
+last_rev: int,
+lifespan: int
+text: String
+}</dd>
+</dl>
+<p>Note that the revisions are identified by their index, NOT the id of
+the revision. The id can be recovered with Page.revisions[rev_index].</p>
+<p>The &#8220;text&#8221; field is saved with the first instance of the sentences.
+For performance, it makes sense to save it only once, rather than
+each time a sentence is saved. Intuitively, however, is is sensible
+that the last revision of the same sentence would be the most correct.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pywikidump.wiki_dump_page.WikiDumpPage.text">
+<tt class="descname">text</tt><big>(</big><em>start=None</em>, <em>end=None</em><big>)</big><a class="headerlink" href="#pywikidump.wiki_dump_page.WikiDumpPage.text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the text of the page.</p>
+<p>The start and end args specify byte locations, relative to the parent
+WikiDumpFile. If specified, they need to be within the boundaries of
+this page&#8217;s byte locations.</p>
+</dd></dl>
+
+</dd></dl>
+
+<span class="target" id="module-pywikidump.wiki_dump_revision"></span><dl class="class">
+<dt id="pywikidump.wiki_dump_revision.WikiDumpRevision">
+<em class="property">class </em><tt class="descclassname">pywikidump.wiki_dump_revision.</tt><tt class="descname">WikiDumpRevision</tt><big>(</big><em>parent</em>, <em>start</em>, <em>end</em>, <em>rid</em>, <em>timestamp</em>, <em>text_start</em>, <em>text_end</em>, <em>**kwargs</em><big>)</big><a class="headerlink" href="#pywikidump.wiki_dump_revision.WikiDumpRevision" title="Permalink to this definition">¶</a></dt>
+<dd><p>Representation of a single revision of a Wikipedia page.</p>
+<dl class="method">
+<dt id="pywikidump.wiki_dump_revision.WikiDumpRevision.keys">
+<tt class="descname">keys</tt><big>(</big><em>size=2</em><big>)</big><a class="headerlink" href="#pywikidump.wiki_dump_revision.WikiDumpRevision.keys" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return fingerprinted keys for each sentence</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pywikidump.wiki_dump_revision.WikiDumpRevision.name">
+<tt class="descname">name</tt><a class="headerlink" href="#pywikidump.wiki_dump_revision.WikiDumpRevision.name" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the page name</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pywikidump.wiki_dump_revision.WikiDumpRevision.plaintext">
+<tt class="descname">plaintext</tt><a class="headerlink" href="#pywikidump.wiki_dump_revision.WikiDumpRevision.plaintext" title="Permalink to this definition">¶</a></dt>
+<dd><p>The article text without wiki formatting</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pywikidump.wiki_dump_revision.WikiDumpRevision.raw">
+<tt class="descname">raw</tt><a class="headerlink" href="#pywikidump.wiki_dump_revision.WikiDumpRevision.raw" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the raw xml of the revision</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="pywikidump.wiki_dump_revision.WikiDumpRevision.sentences">
+<tt class="descname">sentences</tt><big>(</big><big>)</big><a class="headerlink" href="#pywikidump.wiki_dump_revision.WikiDumpRevision.sentences" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return all the sentences from the text</p>
+<p>Since this may be run on a large number of texts, the smart parameter
+lets you tokenize with NLTK (smart=True) or with a faster, sloppy
+regular expression.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pywikidump.wiki_dump_revision.WikiDumpRevision.text">
+<tt class="descname">text</tt><a class="headerlink" href="#pywikidump.wiki_dump_revision.WikiDumpRevision.text" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return the unprocessed text content of the revision</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pywikidump.wiki_dump_revision.WikiDumpRevision.timestamp">
+<tt class="descname">timestamp</tt><a class="headerlink" href="#pywikidump.wiki_dump_revision.WikiDumpRevision.timestamp" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a parsed timestamp</p>
+</dd></dl>
+
+</dd></dl>
+
 </div>
-</div>
-<div class="section" id="tutorial">
-<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
-</div>
-<div class="section" id="pywikidump-api">
-<h1>PyWikiDump API<a class="headerlink" href="#pywikidump-api" title="Permalink to this headline">¶</a></h1>
-</div>
-<div class="section" id="fingerprinting-api">
-<h1>Fingerprinting API<a class="headerlink" href="#fingerprinting-api" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-fingerprinting.ngram_fingerprint">
+<span id="fingerprinting-api"></span><h1>Fingerprinting API<a class="headerlink" href="#module-fingerprinting.ngram_fingerprint" title="Permalink to this headline">¶</a></h1>
+<p>Generate a N-Gram Fingerprint for a string.</p>
+<p>Based on OpenRefine:
+Details: <a class="reference external" href="https://github.com/OpenRefine/OpenRefine/wiki/Clustering-In-Depth">https://github.com/OpenRefine/OpenRefine/wiki/Clustering-In-Depth</a>
+Code
+<a class="reference external" href="https://github.com/OpenRefine/OpenRefine/blob/master/main/src/com/google/">https://github.com/OpenRefine/OpenRefine/blob/master/main/src/com/google/</a>        refine/clustering/binning/NGramFingerprintKeyer.java</p>
+<p>&#64;author:Peter Organisciak</p>
+<dl class="class">
+<dt id="fingerprinting.ngram_fingerprint.nGramFingerprintKeyer">
+<em class="property">class </em><tt class="descclassname">fingerprinting.ngram_fingerprint.</tt><tt class="descname">nGramFingerprintKeyer</tt><big>(</big><em>size=2</em><big>)</big><a class="headerlink" href="#fingerprinting.ngram_fingerprint.nGramFingerprintKeyer" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="fingerprinting.ngram_fingerprint.nGramFingerprintKeyer.key">
+<tt class="descname">key</tt><big>(</big><em>s</em><big>)</big><a class="headerlink" href="#fingerprinting.ngram_fingerprint.nGramFingerprintKeyer.key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="fingerprinting.ngram_fingerprint.nGramFingerprintKeyer.ngram_split">
+<tt class="descname">ngram_split</tt><big>(</big><em>s</em><big>)</big><a class="headerlink" href="#fingerprinting.ngram_fingerprint.nGramFingerprintKeyer.ngram_split" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
 </div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
@@ -92,16 +240,14 @@ Contents:</p>
 <li><a class="reference internal" href="#">Welcome to PyWikidump&#8217;s documentation!</a><ul>
 </ul>
 </li>
-<li><a class="reference internal" href="#installation">Installation</a><ul>
-<li><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
-</ul>
-</li>
-<li><a class="reference internal" href="#tutorial">Tutorial</a></li>
-<li><a class="reference internal" href="#pywikidump-api">PyWikiDump API</a></li>
-<li><a class="reference internal" href="#fingerprinting-api">Fingerprinting API</a></li>
+<li><a class="reference internal" href="#module-pywikidump.wiki_dump_file">PyWikiDump API</a></li>
+<li><a class="reference internal" href="#module-fingerprinting.ngram_fingerprint">Fingerprinting API</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 
+  <h4>Next topic</h4>
+  <p class="topless"><a href="installation.html"
+                        title="next chapter">Installation</a></p>
   <h3>This Page</h3>
   <ul class="this-page-menu">
     <li><a href="_sources/index.txt"
@@ -130,6 +276,12 @@ Contents:</p>
         <li class="right" style="margin-right: 10px">
           <a href="genindex.html" title="General Index"
              >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="installation.html" title="Installation"
+             >next</a> |</li>
         <li><a href="#">PyWikidump 1.0 documentation</a> &raquo;</li> 
       </ul>
     </div>

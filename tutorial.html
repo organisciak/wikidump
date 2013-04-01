@@ -1,0 +1,205 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Tutorial &mdash; PyWikidump 1.0 documentation</title>
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '1.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="PyWikidump 1.0 documentation" href="index.html" />
+    <link rel="prev" title="Overview" href="overview.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="overview.html" title="Overview"
+             accesskey="P">previous</a> |</li>
+        <li><a href="index.html">PyWikidump 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="tutorial">
+<h1>Tutorial<a class="headerlink" href="#tutorial" title="Permalink to this headline">¶</a></h1>
+<p>Below is a short introduction to pywikidump. For a brief overview of what can be done with the library, see <a class="reference internal" href="overview.html"><em>Overview</em></a>.</p>
+<div class="section" id="setup">
+<h2>Setup<a class="headerlink" href="#setup" title="Permalink to this headline">¶</a></h2>
+<p>Prior to trying this tutorial, make sure you have <tt class="xref py py-mod docutils literal"><span class="pre">pywikidump</span></tt> and dependencies installed according to the <a class="reference internal" href="installation.html"><em>Installation</em></a> instructions.</p>
+<p>PyWikiDump interfaces with Wikipedia full history bzip2 data dumps. These can be obtained at <a class="reference external" href="http://dumps.wikimedia.org/enwiki/latest">Wikimedia</a> with the filenames <tt class="docutils literal"><span class="pre">enwiki-latest-pages-meta-history….bz2</span></tt>. For this tutorial, you can use a small sample found in <tt class="docutils literal"><span class="pre">test/tiny_wikipedia_export.bz2</span></tt>.</p>
+<p>To set-up for the examples below, first we&#8217;ll load memcached. In a separate console window, type <strong class="command">memcached</strong> in your terminal to load the memcached daemon on the default port.</p>
+</div>
+<div class="section" id="loading-a-wikipedia-export-file">
+<h2>Loading a Wikipedia Export File<a class="headerlink" href="#loading-a-wikipedia-export-file" title="Permalink to this headline">¶</a></h2>
+<p>Wikipedia files are represented with <tt class="xref py py-class docutils literal"><span class="pre">pywikidump.WikiDumpFile</span></tt>, instantiated with the path to the file and a memcached client from pylibmc.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="kn">from</span> <span class="nn">pywikidump</span> <span class="kn">import</span> <span class="n">WikiDumpFile</span>
+<span class="kn">import</span> <span class="nn">pylibmc</span>
+<span class="c"># Connect to memcached</span>
+<span class="hll"><span class="n">mc</span> <span class="o">=</span> <span class="n">pylibmc</span><span class="o">.</span><span class="n">Client</span><span class="p">([</span><span class="s">&quot;127.0.0.1&quot;</span><span class="p">],</span> <span class="n">binary</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span><span class="hll"><span class="n">path</span> <span class="o">=</span> <span class="s">&#39;test/tiny_wikipedia_export.bz2&#39;</span>
+</span><span class="n">wikifile</span> <span class="o">=</span> <span class="n">WikiDumpFile</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">memcached</span><span class="o">=</span><span class="n">mc</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="fetching-wikipedia-pages">
+<h2>Fetching Wikipedia Pages<a class="headerlink" href="#fetching-wikipedia-pages" title="Permalink to this headline">¶</a></h2>
+<p>Pages are read consecutively in the bz2 stream. <tt class="xref py py-meth docutils literal"><span class="pre">WikiDumpFile.next_page()</span></tt> reads the WikiDumpFile until a page ends. By default, only pages from the main namespace (i.e. the articles) are returned, and redirects are skipped.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="c"># Get a Page</span>
+<span class="n">page</span> <span class="o">=</span> <span class="n">wikifile</span><span class="o">.</span><span class="n">next_page</span><span class="p">()</span>
+</pre></div>
+</div>
+<p><tt class="xref py py-meth docutils literal"><span class="pre">next_page()</span></tt> returns a <tt class="xref py py-class docutils literal"><span class="pre">pywikidump.WikiDumpPage</span></tt> instance of the next page in the file:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">page</span><span class="o">.</span><span class="n">name</span>
+<span class="go">Kozhukhovskaya</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">page</span><span class="o">.</span><span class="n">id</span>
+<span class="go">4758087</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">page</span><span class="o">.</span><span class="n">text</span><span class="p">()</span>
+<span class="go">&lt;title&gt;Kozhukhovskaya&lt;/title&gt;\n&lt;ns&gt;0&lt;/ns&gt;\n&lt;id&gt;4758087&lt;/id&gt;...</span>
+</pre></div>
+</div>
+<p>The parent file is also accessible through <tt class="xref py py-data docutils literal"><span class="pre">parent</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">page</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span>
+<span class="go">tiny_wikipedia_export.bz2</span>
+</pre></div>
+</div>
+<p>Note that reading a page moves the pointer through the WikiDumpFile, saving the new byte location in <tt class="xref py py-data docutils literal"><span class="pre">WikiDumpFile.loc</span></tt>.:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;File location is {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">wikifile</span><span class="o">.</span><span class="n">loc</span><span class="p">)</span>
+<span class="go">File location is 58908</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">):</span>
+<span class="gp">... </span>   <span class="n">page</span> <span class="o">=</span> <span class="n">wikifile</span><span class="o">.</span><span class="n">next_page</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">print</span> <span class="s">&quot;New file location is {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">wikifile</span><span class="o">.</span><span class="n">loc</span><span class="p">)</span>
+<span class="go">New file location is 2262794</span>
+</pre></div>
+</div>
+<p>One thing to note is that <tt class="xref py py-class docutils literal"><span class="pre">WikiDumpPage</span></tt> does not save the text. Instead, it remembers the byte locations of the page in the export file. Since seeking through such a large file can be costly, memcached saves the article text temporarily. If the memcached entry is no longer available, text is read from the main file with <tt class="xref py py-meth docutils literal"><span class="pre">WikiDumpFile.read()</span></tt>.</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">page</span><span class="o">.</span><span class="n">start</span>
+<span class="go">2235</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">page</span><span class="o">.</span><span class="n">end</span>
+<span class="go">58908</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="moments-in-time-with-revisions">
+<h2>Moments in time with revisions<a class="headerlink" href="#moments-in-time-with-revisions" title="Permalink to this headline">¶</a></h2>
+<p>One way to think of <tt class="xref py py-class docutils literal"><span class="pre">WikiDumpPage</span></tt> is as the entire history of a Wikipedia article. However, articles are constantly being editing. A snapshot of an article at a particular moment in time is known as &#8216;&#8217;&#8216;revision&#8217;&#8216;&#8217;. Revisions are represented as <tt class="xref py py-class docutils literal"><span class="pre">WikiDumpRevision</span></tt> and accessed through <tt class="xref py py-meth docutils literal"><span class="pre">WikiDumpPage.revisions()</span></tt>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">revision</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">page</span><span class="o">.</span><span class="n">revisions</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">print</span> <span class="s">&quot;{0}</span><span class="se">\t</span><span class="s">{1}</span><span class="se">\t</span><span class="s">{2}</span><span class="se">\t</span><span class="s">{3}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">revision</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">revision</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>
+<span class="gp">... </span>                                      <span class="n">revision</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="go">0       48559048        2006-04-15 12:24:27     Kozhukhovskaya</span>
+<span class="go">1       49064796        2006-04-18 22:00:36     Kozhukhovskaya</span>
+<span class="go">2       49064837        2006-04-18 22:00:53     Kozhukhovskaya</span>
+<span class="go">3       49064954        2006-04-18 22:01:50     Kozhukhovskaya</span>
+<span class="go">…</span>
+<span class="go">21      422120151       2011-04-03 10:18:08     Kozhukhovskaya</span>
+<span class="go">22      422150476       2011-04-03 14:56:23     Kozhukhovskaya</span>
+<span class="go">23      465930271       2011-12-15 02:28:29     Kozhukhovskaya</span>
+</pre></div>
+</div>
+<p>Through <tt class="xref py py-class docutils literal"><span class="pre">WikiDumpRevision</span></tt>, it is easy to access data such as <tt class="xref py py-meth docutils literal"><span class="pre">sentences()</span></tt>, <tt class="xref py py-data docutils literal"><span class="pre">plaintext</span></tt>, and <tt class="xref py py-data docutils literal"><span class="pre">timestamp</span></tt>. Below is an example of how such information could be used with mimal code.</p>
+<a class="reference internal image-reference" href="_images/tutorial-time-length.png"><img alt="_images/tutorial-time-length.png" src="_images/tutorial-time-length.png" style="width: 400.0px; height: 300.0px;" /></a>
+<p>(Code: <a class="reference internal" href="examples/plot-time-length.html"><em>Time vs Article Length Plot</em></a>)</p>
+</div>
+</div>
+<div class="section" id="tracking-text-across-revisions">
+<h1>Tracking text across revisions<a class="headerlink" href="#tracking-text-across-revisions" title="Permalink to this headline">¶</a></h1>
+<p>Revision sentences are keyed according to an <a href="#id1"><span class="problematic" id="id2">`NGram Fingerprinter&lt;https://github.com/OpenRefine/OpenRefine/wiki/Clustering-In-Depth#n-gram-fingerprint&gt;`_</span></a>:</p>
+<div class="highlight-python"><div class="highlight"><pre><span class="gp">&gt;&gt;&gt; </span><span class="n">revision</span> <span class="o">=</span> <span class="n">page</span><span class="o">.</span><span class="n">revisions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">revision</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+<span class="go">[&#39;alanasatayblcoemetgrhehohuinioiskakhkolalilya…scskslsttathtitrubuku\xd0vswmyayuzh, &#39;adalarataubiblcechcoctdeeaecedeie…meoeperesetf&#39;]</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Tutorial</a><ul>
+<li><a class="reference internal" href="#setup">Setup</a></li>
+<li><a class="reference internal" href="#loading-a-wikipedia-export-file">Loading a Wikipedia Export File</a></li>
+<li><a class="reference internal" href="#fetching-wikipedia-pages">Fetching Wikipedia Pages</a></li>
+<li><a class="reference internal" href="#moments-in-time-with-revisions">Moments in time with revisions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#tracking-text-across-revisions">Tracking text across revisions</a></li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="overview.html"
+                        title="previous chapter">Overview</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/tutorial.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="overview.html" title="Overview"
+             >previous</a> |</li>
+        <li><a href="index.html">PyWikidump 1.0 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2013, Peter Organisciak.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.1.3.
+    </div>
+  </body>
+</html>
