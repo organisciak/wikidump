@@ -2,6 +2,7 @@ import re
 import datetime
 
 # Regular Expressions
+
 # [[Wikipedia_page|Text on the page]]
 #   Group 1 is link, 2 is text
 WIKI_PIPED_LINK = re.compile(r"\[\[(.*?)\|(.*?)\]\]")
@@ -17,6 +18,13 @@ WIKI_FORMATTING = re.compile(r"""
                              """,
                              re.VERBOSE | re.DOTALL | re.IGNORECASE
                              )
+WIKI_HEADING = re.compile(r'^==.*?==\n', re.MULTILINE)
+
+# Special tags
+WIKI_CATEGORIES = re.compile(r"^Category:.*?\n", re.MULTILINE)
+langs = ['en', 'pl', 'ru', 'it', 'pt', 'cs', 'fr', 'nl']
+WIKI_LANGUAGES = re.compile(r"^(?:{0}):.*?$\n?".format("|".join(langs)),
+                            re.MULTILINE)
 #WIKI_TABLE = re.compile
 
 

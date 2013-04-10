@@ -1,7 +1,8 @@
 import re
 from nltk.tokenize import sent_tokenize
 from utils import (strip_between, WIKI_INTERNAL_LINK, WIKI_PIPED_LINK,
-                   WIKI_FORMATTING, parse_time)
+                   WIKI_FORMATTING, WIKI_CATEGORIES, WIKI_LANGUAGES,
+                   WIKI_HEADING, parse_time)
 from fingerprinting import nGramFingerprintKeyer
 
 
@@ -54,6 +55,9 @@ class WikiDumpRevision(object):
         s = re.sub(WIKI_PIPED_LINK, r"\2", s)
         s = re.sub(WIKI_INTERNAL_LINK, r"\1", s)
         s = re.sub(WIKI_FORMATTING, "", s)
+        # Remove Categories
+        s = re.sub(WIKI_CATEGORIES, "", s)
+        s = re.sub(WIKI_LANGUAGES, "", s)
         return s
 
     def sentences(self):
@@ -65,7 +69,11 @@ class WikiDumpRevision(object):
         regular expression.
 
         '''
-        sentences = sent_tokenize(self.plaintext)
+        s = self.plaintext
+        # Clean up for sentence tokenizing
+        s = re.sub(WIKI_HEADING, "", s)
+        # Tokenize
+        sentences = sent_tokenize(s)
         return sentences
 
     def keys(self, size=2):
