@@ -1,5 +1,6 @@
 from wiki_dump_revision import WikiDumpRevision
-from collections import defaultdict
+from wiki_dump_history import PageHistory
+import logging
 
 
 class WikiDumpPage(object):
@@ -51,40 +52,58 @@ class WikiDumpPage(object):
         each time a sentence is saved. Intuitively, however, is is sensible
         that the last revision of the same sentence would be the most correct.
         '''
-        if cache is True and self._sent_cache:
-            return self._sent_cache
-        if cache is False or not self._sent_cache:
-            '''sent_index = {}
-            for i, revision in enumerate(self.revisions):
-                keys = revision.keys(size=key_size)
-                for key in keys:
-                    if key not in sent_index:
-                        sent_index[key] = {
-                            'history': [],
-                            'first_rev': i,
-                            'last_rev': 0,
-                            'lifespan': 0
-                        }
-                    sent_index[key]['history'] += [i]
-                    sent_index[key]['last_rev'] = i
+        if cache is True and not self.memcached:
+            logging.error('Not caching because no memcached connection'
+                          'found.')
+            cache = False
+        if cache is True and self.memcached:
+            cached = self.memcached.get("%d-sent-keys" % self.id)
+            if cached is not None:
+                return cached
 
-            # Calculate sentence lifetimes
-            for key in sent_index.iterkeys():
-                sent_index[key]['lifespan'] = (1 + sent_index[key]['last_rev']
-                                               - sent_index[key]['first_rev'])
+        sent_index = PageHistory()
+        for i, revision in enumerate(self.revisions):
+            sents = zip(revision.sentences(),
+                        revision.keys(size=key_size)
+                        )
+            sent_index.add_revision(revision.timestamp, index=i)
+            for sentinfo in sents:
+                sent_index.add_history(sentinfo, i)
+                '''
+                if key not in sent_index:
+                    sent_index[key] = {
+                        'first_rev': i,
+                        'last_rev': 0,
+                        'lifespan': 0
+                    }
+                sent_index[key]['history'] += [(i)]
+                sent_index[key]['last_rev'] = i
+        '''
+        # Calculate sentence lifetimes
+        for key in sent_index.sentences.iterkeys():
+            print "Rev lifetime: {0} -- {1} ({2} edits, {3})".format(
+                sent_index.first_revision(key),
+                sent_index.last_revision(key),
+                sent_index.survival(key, type='edits'),
+                sent_index.survival(key)
+            )
+        '''
+            sent_index[key]['lifespan'] = (1 + sent_index[key]['last_rev']
+                                           - sent_index[key]['first_rev'])
 
-            if cache is True:
-                self._sent_cache = sent_index
-            return sent_index'''
-            sent_history = defaultdict(list)
-            #sent_firstrev = {}
-            #sent_lastrev = defaultdict(int)
+        if cache is True:
+            self._sent_cache = sent_index
+        '''
+        return sent_index
+        '''sent_history = defaultdict(list)
+        #sent_firstrev = {}
+        #sent_lastrev = defaultdict(int)
 
-            for i, revision in enumerate(self.revisions):
-                keys = revision.keys(size=2)
-                for key in keys:
-                    sent_history[key].append(i)
-            return sent_history
+        for i, revision in enumerate(self.revisions):
+            keys = revision.keys(size=2)
+            for key in keys:
+                sent_history[key].append(i)
+        return sent_history'''
 
     def text(self, start=None, end=None):
         '''
