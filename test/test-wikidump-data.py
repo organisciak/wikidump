@@ -26,7 +26,7 @@ def main():
 
     print "File location is {0}".format(wikifile.loc)
     #Skip Some Pages
-    for i in range(0, 4):
+    for i in range(0, 7):
         page = wikifile.next_page()
     print "New file location is {0}".format(wikifile.loc)
 

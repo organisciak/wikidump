@@ -4,6 +4,7 @@ from utils import (strip_between, WIKI_INTERNAL_LINK, WIKI_PIPED_LINK,
                    WIKI_FORMATTING, WIKI_CATEGORIES, WIKI_LANGUAGES,
                    WIKI_HEADING, parse_time)
 from fingerprinting import nGramFingerprintKeyer
+import HTMLParser
 
 
 # CLASSES
@@ -47,12 +48,16 @@ class WikiDumpRevision(object):
 
     def _plaintext(self, string):
         s = string
+        # Unescape HTML
+        s = HTMLParser.HTMLParser().unescape(s.decode("UTF-8"))
+        # Remove all special {{}} tags, for the time being
+        #s = strip_between(r'\*? ?{{', r'}}', s)
         # Remove infobox (assumes close tag is at the start of a line)
-        s = strip_between("\{\{Infobox", "\n\}\}", s)
+        #s = strip_between("\{\{Infobox", "\n\}\}", s)
         # Remove tables
         s = strip_between(r"\{\|", r"\|\}", s)
         # Remove comments
-        s = strip_between(r"&lt;!--", r"&gt;", s)
+        s = strip_between(r"<!--", r"-->", s)
         # Simplify links
         s = re.sub(WIKI_PIPED_LINK, r"\2", s)
         s = re.sub(WIKI_INTERNAL_LINK, r"\1", s)
@@ -60,8 +65,8 @@ class WikiDumpRevision(object):
         # Remove Categories
         s = re.sub(WIKI_CATEGORIES, "", s)
         s = re.sub(WIKI_LANGUAGES, "", s)
-        # Remove all special {{}} tags, for the time being
-        s = strip_between(r'{{', r'}}', s)
+        # Replace Links with just their text
+        s = re.sub(r"\[http.*? (.*?)]", "\g<1>", s)
         return s
 
     def sentences(self):
@@ -78,6 +83,11 @@ class WikiDumpRevision(object):
         s = re.sub(WIKI_HEADING, "\g<title>.", s)
         # Make lists into sentences
         s = re.sub(r'^[\*\#](.*?)$', r'\g<1>.', s, flags=re.MULTILINE)
+        # Remove References
+        #s = strip_between(r"<ref name=["'](.*?)["']", r"<\/ref>", s)
+        WIKI_REFS = re.compile(r'''<ref name=["'](.*?)["'].*?>(.*)<\/ref>''')
+        s = re.sub(WIKI_REFS, "[[\g<1>]]", s)
+        s = re.sub(r"([\.\?\!])\s{0,3}(\[\[.*?\]\])", r"\g<2>\g<1>", s)
         # Tokenize
         sentences = sent_tokenize(s)
         # Strip whitespace

@@ -22,8 +22,6 @@ class nGramFingerprintKeyer:
         s = s.lower()
 
         # Remove punctuation, control characters, and whitespace
-        s = s.translate(self.table, self.punc_ctrl)
-        s = "".join(s.split())
 
         # Split into NGrams, remove duplicates, and sort
         ngrams = self.ngram_split(s)
@@ -34,6 +32,20 @@ class nGramFingerprintKeyer:
         s = "".join(ngrams)
 
         #TODO: convert extended characters to ASCII
+        return s
+
+    def _translate_unicode(self, s):
+        ''' Remove punctuation, control characters, and whitespace on
+        a unicode string (i.e. Python 3 style) '''
+        s = s.translate(self.punc_ctrl)
+        s = "".join(s.split())
+        return s
+
+    def _translate_byte(self, s):
+        ''' Remove punctuation, control characters, and whitespace on
+        a byte sequence (i.e. Python 2 style) '''
+        s = s.translate(self.table, self.punc_ctrl)
+        s = "".join(s.split())
         return s
 
     def ngram_split(self, s):
