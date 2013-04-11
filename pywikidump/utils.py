@@ -18,14 +18,17 @@ WIKI_FORMATTING = re.compile(r"""
                              """,
                              re.VERBOSE | re.DOTALL | re.IGNORECASE
                              )
-WIKI_HEADING = re.compile(r'^==.*?==\n', re.MULTILINE)
+WIKI_HEADING = re.compile(r"""
+                          ^(=+)     # One or more equal signs at line start
+                          (?P<title>.*?) # Named group for heading title
+                          (\1)$    # Same number of equal signs as earlier
+                          """, re.VERBOSE | re.MULTILINE)
 
 # Special tags
 WIKI_CATEGORIES = re.compile(r"^Category:.*?\n", re.MULTILINE)
 langs = ['en', 'pl', 'ru', 'it', 'pt', 'cs', 'fr', 'nl']
 WIKI_LANGUAGES = re.compile(r"^(?:{0}):.*?$\n?".format("|".join(langs)),
                             re.MULTILINE)
-#WIKI_TABLE = re.compile
 
 
 # Functions

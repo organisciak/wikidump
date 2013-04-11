@@ -51,6 +51,8 @@ class WikiDumpRevision(object):
         s = strip_between("\{\{Infobox", "\n\}\}", s)
         # Remove tables
         s = strip_between(r"\{\|", r"\|\}", s)
+        # Remove comments
+        s = strip_between(r"&lt;!--", r"&gt;", s)
         # Simplify links
         s = re.sub(WIKI_PIPED_LINK, r"\2", s)
         s = re.sub(WIKI_INTERNAL_LINK, r"\1", s)
@@ -58,6 +60,8 @@ class WikiDumpRevision(object):
         # Remove Categories
         s = re.sub(WIKI_CATEGORIES, "", s)
         s = re.sub(WIKI_LANGUAGES, "", s)
+        # Remove all special {{}} tags, for the time being
+        s = strip_between(r'{{', r'}}', s)
         return s
 
     def sentences(self):
@@ -71,9 +75,13 @@ class WikiDumpRevision(object):
         '''
         s = self.plaintext
         # Clean up for sentence tokenizing
-        s = re.sub(WIKI_HEADING, "", s)
+        s = re.sub(WIKI_HEADING, "\g<title>.", s)
+        # Make lists into sentences
+        s = re.sub(r'^[\*\#](.*?)$', r'\g<1>.', s, flags=re.MULTILINE)
         # Tokenize
         sentences = sent_tokenize(s)
+        # Strip whitespace
+        sentences = [sentence.strip() for sentence in sentences]
         return sentences
 
     def keys(self, size=2):

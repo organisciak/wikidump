@@ -26,7 +26,7 @@ def main():
 
     print "File location is {0}".format(wikifile.loc)
     #Skip Some Pages
-    for i in range(0, 1):
+    for i in range(0, 4):
         page = wikifile.next_page()
     print "New file location is {0}".format(wikifile.loc)
 
@@ -50,10 +50,7 @@ def main():
     # View all the sentence keys for the page
     # print page.sent_keys(key_size=2, cache=False)
 
-    for s in page.revisions[-1].sentences():
-        print "============="
-        print s
-        print "============="
+    print "\n=======\n".join(page.revisions[-1].sentences())
     return
     #start = time.time()
 

@@ -36,19 +36,19 @@ def plot_sentence_time(page):
 
 
 def revision_times(page):
+    xlabel('Date')
     rtimes = [revision.timestamp for revision in page.revisions]
     dates = matplotlib.dates.date2num(rtimes)
-    xlabel('Date')
     return dates
 
 
-# X-Axis Builders
 def revision_index(page):
     a = range(0, len(page.revisions))
-    xlabel("Revision")
+    ylabel("Revision")
     return a
 
 
+# Y-Axis Builders
 def article_length(page):
     ylabel('Article length')
     rlengths = [len(revision.plaintext) for revision in page.revisions]
