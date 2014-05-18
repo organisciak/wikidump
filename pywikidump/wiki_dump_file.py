@@ -12,13 +12,15 @@ from wiki_dump_page import WikiDumpPage
 ### Regular Expressions ###
 
 # Tags
-TEXT_TAG_START = re.compile('\s*\<text xml:space="preserve"\>')
+TEXT_TAG_START = re.compile('\s*\<text xml:space="preserve"')
 TEXT_TAG_END = re.compile('.*<\/text>\n?')
 PAGE_TAG_END = re.compile('\s*\<\/page>')
 REVISION_TAG_START = re.compile('\s*\<revision\>\n?')
 REVISION_TAG_END = re.compile('.*\<\/revision\>\n?')
 # Example: <timestamp>2006-04-15T12:24:27Z</timestamp>
 TIMESTAMP_TEXT_MATCH = re.compile(r'<timestamp>(.*)<\/timestamp>')
+COMMENT_TEXT_MATCH = re.compile(r'<comment>(.*)<\/comment>')
+USER_TEXT_MATCH = re.compile(r'<i[d|p]>(.*)<\/i[d|p]>')
 # Syntax
 # In addition to the #REDIRECT tag, account for the invalid but seen REDIRECT:
 REDIRECT = re.compile('\#REDIRECT|REDIRECT:', re.IGNORECASE)
@@ -80,6 +82,7 @@ class WikiDumpFile(object):
 
                 if revision_open:
                     revision['lines'] += 1
+                    # Line count heuristics for less Regex
                     if revision['lines'] is 1:
                         # First line of <revision> is id
                         revision['rid'] = line.strip()[4:-5]
@@ -87,18 +90,31 @@ class WikiDumpFile(object):
                         timestamp = TIMESTAMP_TEXT_MATCH.search(line)
                         if timestamp is not None:
                             revision['timestamp'] = timestamp.group(1)
+                    elif revision['lines'] is 5 or revision['lines'] is 6:
+                        author = USER_TEXT_MATCH.search(line)
+                        if author is not None:
+                            revision['author'] = author.group(1)
                     elif REVISION_TAG_END.search(line):
                         revision_open = False
                         revision['end'] = self.loc
                         page['revisions'] += [revision]
                     elif TEXT_TAG_START.match(line):
                         revision['text_start'] = self.loc - len(line) + 33
+                        if line[30:35] == 'e" />':
+                            logging.debug("Skipping blank revision")
+                            revision_open = False
+                            revision = {}
                         if REDIRECT.search(line):
                             # TO CONFIRM: Assumes redirects are always at the
                             # start of the text.
                             logging.debug("Skipping revision due to redirect.")
                             revision_open = False
                             revision = {}
+                    else:
+                        # Comments are infrequent, so saving this for last
+                        comment = COMMENT_TEXT_MATCH.search(line)
+                        if comment is not None:
+                            revision['comment'] = comment.group(1)
                     # No elif b/c <text> can start and end on the same line
                     if TEXT_TAG_END.search(line):
                         #line[-8:] == '</text>\n':

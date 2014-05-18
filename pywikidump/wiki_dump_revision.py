@@ -11,7 +11,7 @@ import HTMLParser
 class WikiDumpRevision(object):
     ''' Representation of a single revision of a Wikipedia page.'''
     def __init__(self, parent, start, end, rid, timestamp, text_start,
-                 text_end, **kwargs):
+                 text_end, author, **kwargs):
         self.parent = parent
         self.start = start
         self.end = end
@@ -19,6 +19,11 @@ class WikiDumpRevision(object):
         self.text_start = text_start
         self.text_end = text_end
         self._timestamp = timestamp
+        if 'comment' in kwargs:
+            self.comment = kwargs['comment']
+        else:
+            self.comment = None
+        self.author = author
 
     @property
     def name(self):
