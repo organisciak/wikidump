@@ -1,13 +1,16 @@
-= PyWikiDump
-'''A library for efficiently parsing Wikipedia export files.'''
+=======
+PyWikiDump
+==========
 
-## Installation
+*A library for efficiently parsing Wikipedia export files.*
 
-### Pre-requisites
+### Documentation
 
- - memcached
- - pylibmc
- - matplotlib 
+http://organisciak.github.com/wikidump/
+
+### Tutorial
+
+http://organisciak.github.com/wikidump/tutorial.html
 
 ### Installing pywikidump
 
