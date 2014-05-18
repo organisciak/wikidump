@@ -5,11 +5,10 @@ Test WikiDumpFile class and related.
 '''
 import os
 import sys
-sys.path.insert(0, os.path.join(os.path.dirname(sys.argv[0]),  ".."))
 import logging
 from pywikidump import WikiDumpFile
-from pywikidump.plots import (plot_length_time)
-import pylibmc
+#from pywikidump.plots import (plot_length_time)
+#import pylibmc
 
 
 def main():
@@ -17,9 +16,10 @@ def main():
                         level=logging.DEBUG)
     #path = os.path.join('/Users/dccuser/Documents/data/wikipedia/'
     #        'enwiki-latest-pages-meta-history15.xml-p004758087p004825000.bz2')
-    path = 'test/tiny_wikipedia_export.bz2'
-    mc = pylibmc.Client(["127.0.0.1"], binary=True)
-    wikifile = WikiDumpFile(path, memcached=mc)
+    path = 'data/tiny_wikipedia_export.bz2'
+    #mc = pylibmc.Client(["127.0.0.1"], binary=True)
+    #wikifile = WikiDumpFile(path, memcached=mc)
+    wikifile = WikiDumpFile(path)
 
     # Get a Page
     page = wikifile.next_page()
